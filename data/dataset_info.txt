@@ -1,0 +1,5 @@
+Dataset Name: EnviroAI Dataset
+Project: EnviroAI
+Description: Combined hourly environmental dataset integrating air quality pollutants, weather conditions, and satellite-based NDVI vegetation data for PM2.5 pollution prediction and analysis.
+Dataset Size: 180644,8
+Status: Data collected, merged from AQI, weather, and NDVI sources, cleaned, and prepared for model training and analysis.
