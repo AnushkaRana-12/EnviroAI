@@ -1,9 +1,0 @@
-Model Evaluation Results (Placeholder)
-
-Model: Random Forest Regressor
-Status: Training and evaluation in progress
-
-Metrics will include:
-- MAE
-- RMSE
-- R2 Score
