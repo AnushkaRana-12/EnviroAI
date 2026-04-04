@@ -3,24 +3,25 @@ st.set_page_config(layout="wide")
 
 import pandas as pd
 import plotly.graph_objects as go
-import pickle
+import joblib
 import matplotlib.pyplot as plt
 import requests
 import datetime
-import shap
 
-# Load CSS
+# ---------------- LOAD CSS ----------------
 def load_css():
     with open("style.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 load_css()
 
-# Load dataset
-data = pd.read_csv("data.csv")
+st.write("Loading data and model...")
 
-# Load model
-model = pickle.load(open("model.pkl", "rb"))
+# ---------------- LOAD DATASET (LIMIT FOR RENDER RAM) ----------------
+data = pd.read_csv("data.csv", nrows=3000)
+
+# ---------------- LOAD MODEL ----------------
+model = joblib.load("model.pkl")
 
 # ---------------- CITY SELECTION ----------------
 st.sidebar.header("Select City")
@@ -72,7 +73,7 @@ with st.spinner("Fetching live data and predicting AQI..."):
     current_aqi = int(current_pm25 * 2)
     predicted_aqi = current_aqi
 
-increase = 5  # simulated increase
+increase = 5
 current_time = datetime.datetime.now().strftime("%d %B %Y, %H:%M")
 
 st.subheader("Health Recommendation")
@@ -165,6 +166,7 @@ st.subheader("AQI Severity Level")
 progress = min(predicted_aqi / 300, 1.0)
 st.progress(progress)
 
+# ---------------- POLLUTANT COMPARISON ----------------
 st.subheader("Pollutant Comparison")
 
 fig = go.Figure()
@@ -187,7 +189,7 @@ fig.update_layout(template="simple_white")
 
 st.plotly_chart(fig)
 
-# ---------------- 6 HOUR FORECAST ----------------
+# ---------------- FORECAST ----------------
 st.subheader("Next 6 Hours AQI Forecast")
 
 future_hours = [1,2,3,4,5,6]
@@ -208,76 +210,6 @@ for i in future_hours:
 fig = go.Figure()
 fig.add_trace(go.Scatter(x=future_hours, y=future_aqi, mode='lines+markers'))
 st.plotly_chart(fig)
-
-st.subheader("🏆 City AQI Ranking")
-
-city_aqi = {}
-
-for city in cities:
-    lat, lon = cities[city]
-    weather = get_live_weather(lat, lon)
-    if weather:
-        t, h, w, n = weather
-        pm = model.predict([[t, h, w, n]])[0]
-        city_aqi[city] = int(pm * 2)
-
-ranking = pd.DataFrame(list(city_aqi.items()), columns=['City', 'AQI'])
-ranking = ranking.sort_values(by='AQI', ascending=False)
-
-st.dataframe(ranking)
-
-# ---------------- AI INSIGHTS ----------------
-st.markdown('<div class="section">', unsafe_allow_html=True)
-st.subheader("AI Generated Insights")
-
-if live_temp > 30:
-    st.markdown('<div class="insight-box">High temperature trapping pollutants</div>', unsafe_allow_html=True)
-
-if live_wind < 5:
-    st.markdown('<div class="insight-box">Low wind speed causing pollution buildup</div>', unsafe_allow_html=True)
-
-if live_ndvi < 0.3:
-    st.markdown('<div class="insight-box">Low vegetation index affecting air quality</div>', unsafe_allow_html=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# ---------------- PRECAUTIONS ----------------
-st.subheader("Precautionary Measures")
-
-if predicted_aqi <= 50:
-    st.markdown('<div class="precaution-box">Air quality is good.</div>', unsafe_allow_html=True)
-elif predicted_aqi <= 100:
-    st.markdown('<div class="precaution-box">Sensitive people should wear mask</div>', unsafe_allow_html=True)
-elif predicted_aqi <= 150:
-    st.markdown('<div class="precaution-box">Avoid outdoor activities</div>', unsafe_allow_html=True)
-else:
-    st.markdown('<div class="precaution-box">Stay indoors</div>', unsafe_allow_html=True)
-
-# ---------------- ENVIRONMENT ----------------
-st.subheader(f"Environmental Factors ({selected_city})")
-
-st.markdown(f'<div class="env-box">Temperature: {live_temp:.2f} °C</div>', unsafe_allow_html=True)
-st.markdown(f'<div class="env-box">Humidity: {live_humidity:.2f} %</div>', unsafe_allow_html=True)
-st.markdown(f'<div class="env-box">Wind Speed: {live_wind:.2f}</div>', unsafe_allow_html=True)
-st.markdown(f'<div class="env-box">NDVI: {live_ndvi:.2f}</div>', unsafe_allow_html=True)
-
-# ---------------- FEATURE IMPORTANCE ----------------
-st.subheader("AI Feature Importance (Environmental Impact)")
-
-features = ['Temperature', 'Humidity', 'Wind Speed', 'NDVI']
-values = [live_temp, live_humidity, live_wind, live_ndvi]
-
-fig, ax = plt.subplots(figsize=(4,2.5))   # smaller size
-ax.barh(features, values)
-
-ax.set_xlabel("Impact Level")
-ax.set_title("Environmental Impact on AQI", fontsize=10)
-
-# Remove extra borders
-ax.spines['top'].set_visible(False)
-ax.spines['right'].set_visible(False)
-
-st.pyplot(fig, use_container_width=False)
 
 # ---------------- MAP ----------------
 st.subheader(f"{selected_city} Location Map")
