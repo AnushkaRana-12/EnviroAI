@@ -1,0 +1,68 @@
+body {
+    background: linear-gradient(120deg, #0b1220, #0f2027);
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* Cards */
+.card {
+    background: #1c2a44;
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    color: white;
+    margin: 10px;
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.3);
+}
+
+/* Prediction Card */
+.prediction-card {
+    background: linear-gradient(135deg, #1abc9c, #16a085);
+    padding: 25px;
+    border-radius: 15px;
+    color: white;
+    text-align: center;
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.3);
+}
+
+/* Alert */
+.alert {
+    background: linear-gradient(135deg, #ff7e5f, #ff3e3e);
+    padding: 20px;
+    border-radius: 15px;
+    color: white;
+    margin: 15px 0;
+}
+
+/* Insight */
+.insight-box {
+    background: #2c3e50;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 8px 0;
+}
+
+/* Precaution */
+.precaution-box {
+    background: #5d6d7e;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 8px 0;
+}
+
+/* Environmental */
+.env-box {
+    background: #d5dbdb;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 8px 0;
+    color: black;
+}
+
+/* Section Box */
+.section {
+    background: #111827;
+    padding: 20px;
+    border-radius: 15px;
+    margin: 15px 0;
+}
