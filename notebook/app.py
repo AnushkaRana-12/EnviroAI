@@ -14,6 +14,8 @@ import gdown
 import warnings
 warnings.filterwarnings("ignore")
 
+PORT = int(os.environ.get("PORT", 8501))
+
 # Load CSS
 def load_css():
     with open("style.css") as f:
