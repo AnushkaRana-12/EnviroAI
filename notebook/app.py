@@ -17,7 +17,6 @@ import requests
 import datetime
 import os
 import zipfile
-import gdown
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -43,8 +42,17 @@ if not os.path.exists("model.pkl"):
     with zipfile.ZipFile("model.zip", "r") as z:
         z.extractall()
 
+from sklearn.ensemble import RandomForestRegressor
+
+model = RandomForestRegressor(
+    n_estimators=50,   # reduce trees
+    max_depth=8,       # reduce depth
+    random_state=42,
+    n_jobs=-1
+)
+
 # Load model
-model = pickle.load(open("model.pkl", "rb"))
+pickle.dump(model, open("model.pkl", "wb"))
 
 # ---------------- CITY SELECTION ----------------
 st.sidebar.header("Select City")
