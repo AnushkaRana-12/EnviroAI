@@ -1,5 +1,12 @@
 import streamlit as st
+
 st.set_page_config(layout="wide")
+
+def load_css():
+    with open("style.css") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+load_css()
 
 import pandas as pd
 import numpy as np
@@ -15,13 +22,6 @@ import warnings
 warnings.filterwarnings("ignore")
 
 PORT = int(os.environ.get("PORT", 8501))
-
-# Load CSS
-def load_css():
-    with open("style.css") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
-load_css()
 
 # UNZIP DATA ONLY IF NOT EXISTS
 if not os.path.exists("data.csv"):
