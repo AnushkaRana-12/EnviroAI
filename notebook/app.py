@@ -1,58 +1,26 @@
 import streamlit as st
-
 st.set_page_config(layout="wide")
 
+import pandas as pd
+import plotly.graph_objects as go
+import pickle
+import matplotlib.pyplot as plt
+import requests
+import datetime
+import shap
+
+# Load CSS
 def load_css():
     with open("style.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 load_css()
 
-import pandas as pd
-import numpy as np
-import plotly.graph_objects as go
-import pickle
-import matplotlib.pyplot as plt
-import requests
-import datetime
-import os
-import zipfile
-import warnings
-warnings.filterwarnings("ignore")
-
-PORT = int(os.environ.get("PORT", 8501))
-
-# UNZIP DATA ONLY IF NOT EXISTS
-if not os.path.exists("data.csv"):
-    with zipfile.ZipFile("data.zip", "r") as z:
-        z.extractall()
-
 # Load dataset
 data = pd.read_csv("data.csv")
 
-# Google Drive file IDs
-model_url = "https://drive.google.com/uc?id=1u4In_-EdYx9wVzLCjn6xkmWjj-pSs2_m"
-
-# Download model.zip
-if not os.path.exists("model.zip"):
-    gdown.download(model_url, "model.zip", quiet=False)
-
-# Unzip model
-if not os.path.exists("model.pkl"):
-    with zipfile.ZipFile("model.zip", "r") as z:
-        z.extractall()
-
-from sklearn.ensemble import RandomForestRegressor
-
-model = RandomForestRegressor(
-    n_estimators=50,   # reduce trees
-    max_depth=8,       # reduce depth
-    random_state=42,
-    n_jobs=-1
-)
-
 # Load model
-pickle.dump(model, open("model.pkl", "wb"))
+model = pickle.load(open("model.pkl", "rb"))
 
 # ---------------- CITY SELECTION ----------------
 st.sidebar.header("Select City")
@@ -107,6 +75,16 @@ with st.spinner("Fetching live data and predicting AQI..."):
 increase = 5  # simulated increase
 current_time = datetime.datetime.now().strftime("%d %B %Y, %H:%M")
 
+st.subheader("Health Recommendation")
+
+if predicted_aqi <= 50:
+    st.success("Air quality is good. Safe for outdoor activities.")
+elif predicted_aqi <= 100:
+    st.warning("Sensitive groups should avoid prolonged outdoor activity.")
+elif predicted_aqi <= 150:
+    st.error("Wear mask and avoid outdoor activities.")
+else:
+    st.error("Stay indoors and use air purifier.")
 
 # ---------------- TITLE ----------------
 st.markdown("<h1>🌍 EnviroAI Dashboard</h1>", unsafe_allow_html=True)
@@ -249,48 +227,19 @@ ranking = ranking.sort_values(by='AQI', ascending=False)
 st.dataframe(ranking)
 
 # ---------------- AI INSIGHTS ----------------
+st.markdown('<div class="section">', unsafe_allow_html=True)
 st.subheader("AI Generated Insights")
 
-insights = []
-
 if live_temp > 30:
-    insights.append("High temperature is trapping pollutants near the surface.")
+    st.markdown('<div class="insight-box">High temperature trapping pollutants</div>', unsafe_allow_html=True)
 
 if live_wind < 5:
-    insights.append("Low wind speed is causing pollution accumulation.")
-
-if live_humidity > 70:
-    insights.append("High humidity is increasing particulate matter concentration.")
+    st.markdown('<div class="insight-box">Low wind speed causing pollution buildup</div>', unsafe_allow_html=True)
 
 if live_ndvi < 0.3:
-    insights.append("Low vegetation index is reducing natural air filtration.")
+    st.markdown('<div class="insight-box">Low vegetation index affecting air quality</div>', unsafe_allow_html=True)
 
-if current_pm25 > 60:
-    insights.append("High PM2.5 levels detected, mainly due to urban emissions.")
-
-# If no condition matches
-if len(insights) == 0:
-    insights.append("Air quality is influenced by moderate environmental conditions.")
-
-# Display all insights
-for insight in insights:
-    st.markdown(f'<div class="insight-box">{insight}</div>', unsafe_allow_html=True)
-
-# ---------------- HEALTH RECOMMENDATION ----------------
-st.subheader("Health Recommendation")
-
-if current_aqi <= 50:
-    msg = "Air quality is good. Safe for outdoor activities."
-elif current_aqi <= 100:
-    msg = "Moderate air quality. Sensitive people should reduce outdoor activity."
-elif current_aqi <= 150:
-    msg = "Sensitive groups should avoid prolonged outdoor activity."
-elif current_aqi <= 200:
-    msg = "Everyone should reduce outdoor activity and wear a mask."
-else:
-    msg = "Health alert! Stay indoors and use air purifiers."
-
-st.markdown(f'<div class="alert">{msg}</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------------- PRECAUTIONS ----------------
 st.subheader("Precautionary Measures")
@@ -323,7 +272,6 @@ ax.barh(features, values)
 
 ax.set_xlabel("Impact Level")
 ax.set_title("Environmental Impact on AQI", fontsize=10)
-
 
 # Remove extra borders
 ax.spines['top'].set_visible(False)
