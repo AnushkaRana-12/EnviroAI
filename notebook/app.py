@@ -28,13 +28,13 @@ if not os.path.exists("data.csv"):
 # Load dataset
 data = pd.read_csv("data.csv")
 
+# Google Drive file IDs
+model_url = "https://drive.google.com/uc?id=1u4In_-EdYx9wVzLCjn6xkmWjj-pSs2_m"
+
 # Unzip model
 if not os.path.exists("model.pkl"):
     with zipfile.ZipFile("model.zip", "r") as z:
         z.extractall()
-
-# Google Drive file IDs
-model_url = "https://drive.google.com/uc?id=1u4In_-EdYx9wVzLCjn6xkmWjj-pSs2_m"
 
 # Load model
 model = pickle.load(open("model.pkl", "rb"))
