@@ -7,4 +7,5 @@ requests
 seaborn
 openpyxl
 plotly
+kaleido
 gdown
