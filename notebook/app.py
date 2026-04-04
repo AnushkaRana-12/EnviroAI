@@ -10,6 +10,7 @@ import requests
 import datetime
 import os
 import zipfile
+import gdown
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -30,6 +31,10 @@ data = pd.read_csv("data.csv")
 
 # Google Drive file IDs
 model_url = "https://drive.google.com/uc?id=1u4In_-EdYx9wVzLCjn6xkmWjj-pSs2_m"
+
+# Download model.zip
+if not os.path.exists("model.zip"):
+    gdown.download(model_url, "model.zip", quiet=False)
 
 # Unzip model
 if not os.path.exists("model.pkl"):
