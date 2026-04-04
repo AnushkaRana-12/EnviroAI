@@ -1,5 +1,0 @@
-Dataset Name: data.csv
-Description: Combined hourly environmental dataset integrating air quality pollutants, weather conditions, and satellite NDVI vegetation index data for PM2.5 prediction and environmental risk analysis.
-Size: 180,644 rows × 8 features
-Features: PM2.5, PM10, NO2, Temperature, Humidity, Wind Speed, NDVI, Timestamp
-Purpose: Air pollution prediction, AQI forecasting, environmental analysis, and explainable AI.
