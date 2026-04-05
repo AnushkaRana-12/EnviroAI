@@ -1,3 +1,5 @@
+from copyreg import pickle
+
 import streamlit as st
 st.set_page_config(layout="wide")
 
@@ -7,6 +9,7 @@ import joblib
 import matplotlib.pyplot as plt
 import requests
 import datetime
+import pickle as pkl
 
 # ---------------- LOAD CSS ----------------
 def load_css():
@@ -15,11 +18,18 @@ def load_css():
 
 load_css()
 
-# ---------------- LOAD DATASET (LIMIT FOR RENDER RAM) ----------------
-data = pd.read_csv("data.csv", nrows=3000)
+# Download model from Google Drive
+model_url = "https://drive.google.com/uc?id=1qk4EoypHcS2CwSz16iWkQBBi8AImJvJo"
+model_file = "model.pkl"
 
-# ---------------- LOAD MODEL ----------------
-model = joblib.load("model.pkl")
+with open(model_file, "wb") as f:
+    f.write(requests.get(model_url).content)
+
+model = joblib.load(model_file)
+
+# Load dataset from Google Drive
+data_url = "https://drive.google.com/uc?id=12H6EKUbgha2oIHLiYDLyyfIwCg9dvVgw"
+data = pd.read_csv(data_url, nrows=3000)
 
 # ---------------- CITY SELECTION ----------------
 st.sidebar.header("Select City")
