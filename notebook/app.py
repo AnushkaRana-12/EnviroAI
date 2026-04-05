@@ -15,8 +15,6 @@ def load_css():
 
 load_css()
 
-st.write("Loading data and model...")
-
 # ---------------- LOAD DATASET (LIMIT FOR RENDER RAM) ----------------
 data = pd.read_csv("data.csv", nrows=3000)
 
@@ -75,17 +73,6 @@ with st.spinner("Fetching live data and predicting AQI..."):
 
 increase = 5
 current_time = datetime.datetime.now().strftime("%d %B %Y, %H:%M")
-
-st.subheader("Health Recommendation")
-
-if predicted_aqi <= 50:
-    st.success("Air quality is good. Safe for outdoor activities.")
-elif predicted_aqi <= 100:
-    st.warning("Sensitive groups should avoid prolonged outdoor activity.")
-elif predicted_aqi <= 150:
-    st.error("Wear mask and avoid outdoor activities.")
-else:
-    st.error("Stay indoors and use air purifier.")
 
 # ---------------- TITLE ----------------
 st.markdown("<h1>🌍 EnviroAI Dashboard</h1>", unsafe_allow_html=True)
@@ -210,6 +197,105 @@ for i in future_hours:
 fig = go.Figure()
 fig.add_trace(go.Scatter(x=future_hours, y=future_aqi, mode='lines+markers'))
 st.plotly_chart(fig)
+
+st.subheader("🏆 City AQI Ranking")
+
+city_aqi = {}
+
+for city in cities:
+    lat, lon = cities[city]
+    weather = get_live_weather(lat, lon)
+    if weather:
+        t, h, w, n = weather
+        pm = model.predict([[t, h, w, n]])[0]
+        city_aqi[city] = int(pm * 2)
+
+ranking = pd.DataFrame(list(city_aqi.items()), columns=['City', 'AQI'])
+ranking = ranking.sort_values(by='AQI', ascending=False)
+
+st.dataframe(ranking)
+
+# ---------------- AI INSIGHTS ----------------
+st.subheader("AI Generated Insights")
+
+insights = []
+
+if live_temp > 30:
+    insights.append("High temperature is trapping pollutants near the surface.")
+
+if live_wind < 5:
+    insights.append("Low wind speed is causing pollution accumulation.")
+
+if live_humidity > 70:
+    insights.append("High humidity is increasing particulate matter concentration.")
+
+if live_ndvi < 0.3:
+    insights.append("Low vegetation index is reducing natural air filtration.")
+
+if current_pm25 > 60:
+    insights.append("High PM2.5 levels detected, mainly due to urban emissions.")
+
+# If no condition matches
+if len(insights) == 0:
+    insights.append("Air quality is influenced by moderate environmental conditions.")
+
+# Display all insights
+for insight in insights:
+    st.markdown(f'<div class="insight-box">{insight}</div>', unsafe_allow_html=True)
+
+# ---------------- HEALTH RECOMMENDATION ----------------
+st.subheader("Health Recommendation")
+
+if current_aqi <= 50:
+    msg = "Air quality is good. Safe for outdoor activities."
+elif current_aqi <= 100:
+    msg = "Moderate air quality. Sensitive people should reduce outdoor activity."
+elif current_aqi <= 150:
+    msg = "Sensitive groups should avoid prolonged outdoor activity."
+elif current_aqi <= 200:
+    msg = "Everyone should reduce outdoor activity and wear a mask."
+else:
+    msg = "Health alert! Stay indoors and use air purifiers."
+
+st.markdown(f'<div class="alert">{msg}</div>', unsafe_allow_html=True)
+
+# ---------------- PRECAUTIONS ----------------
+st.subheader("Precautionary Measures")
+
+if predicted_aqi <= 50:
+    st.markdown('<div class="precaution-box">Air quality is good.</div>', unsafe_allow_html=True)
+elif predicted_aqi <= 100:
+    st.markdown('<div class="precaution-box">Sensitive people should wear mask</div>', unsafe_allow_html=True)
+elif predicted_aqi <= 150:
+    st.markdown('<div class="precaution-box">Avoid outdoor activities</div>', unsafe_allow_html=True)
+else:
+    st.markdown('<div class="precaution-box">Stay indoors</div>', unsafe_allow_html=True)
+
+# ---------------- ENVIRONMENT ----------------
+st.subheader(f"Environmental Factors ({selected_city})")
+
+st.markdown(f'<div class="env-box">Temperature: {live_temp:.2f} °C</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="env-box">Humidity: {live_humidity:.2f} %</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="env-box">Wind Speed: {live_wind:.2f}</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="env-box">NDVI: {live_ndvi:.2f}</div>', unsafe_allow_html=True)
+
+# ---------------- FEATURE IMPORTANCE ----------------
+st.subheader("AI Feature Importance (Environmental Impact)")
+
+features = ['Temperature', 'Humidity', 'Wind Speed', 'NDVI']
+values = [live_temp, live_humidity, live_wind, live_ndvi]
+
+fig, ax = plt.subplots(figsize=(4,2.5))   # smaller size
+ax.barh(features, values)
+
+ax.set_xlabel("Impact Level")
+ax.set_title("Environmental Impact on AQI", fontsize=10)
+
+# Remove extra borders
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+
+st.pyplot(fig, use_container_width=False)
 
 # ---------------- MAP ----------------
 st.subheader(f"{selected_city} Location Map")
